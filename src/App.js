@@ -92,8 +92,8 @@ export default class App extends Component {
     const genRand = () => Math.PI * ((Math.random() - 0.5) * (1 / 16));
     const trunk = genTree({
       genRand,
-      rootX: 200,
-      rootY: 500,
+      rootX: 270,
+      rootY: 600,
       maxLevels: 10,
       baseLength: 75,
       maxWidth: 10
@@ -102,9 +102,9 @@ export default class App extends Component {
     return (
       <div>
         <svg
-          viewBox="0 0 500 500"
-          width="500"
-          height="500"
+          viewBox="0 0 600 600"
+          width="600"
+          height="600"
           version="1.1"
           baseProfile="full"
           xmlns="http://www.w3.org/2000/svg"
