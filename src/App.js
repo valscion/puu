@@ -85,6 +85,7 @@ export default class App extends Component {
           xmlns="http://www.w3.org/2000/svg"
         >
           <Branch {...trunk} />
+          <Leaves {...trunk} />
         </svg>
       </div>
     );
@@ -108,24 +109,42 @@ function Branch(props) {
           <Branch {...left} />
           <Branch {...right} />
         </>
-      ) : (
-        <Leaf x={nextX} y={nextY} />
-      )}
+      ) : null}
     </g>
+  );
+}
+
+function Leaves(props) {
+  const { self, left, right } = props;
+  if (self === null) return null;
+  const { nextX, nextY, level } = self;
+
+  if (level < 3) {
+    return (
+      <>
+        <Leaves {...left} />
+        <Leaves {...right} />
+      </>
+    );
+  }
+
+  const lastLeaf = !left && !right;
+
+  return (
+    <>
+      {lastLeaf && <Leaf x={nextX} y={nextY} />}
+      {left && right ? (
+        <>
+          <Leaves {...left} />
+          <Leaves {...right} />
+        </>
+      ) : null}
+    </>
   );
 }
 
 function Leaf(props) {
   const { x, y } = props;
 
-  return (
-    <ellipse
-      cx={x}
-      cy={y}
-      rx="3"
-      ry="10"
-      fill="green"
-      stroke-width="3"
-    />
-  );
+  return <ellipse cx={x} cy={y} rx="3" ry="10" fill="green" stroke-width="3" />;
 }
