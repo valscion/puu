@@ -5,7 +5,7 @@ const stroke = { stroke: "black", "stroke-linecap": "round" };
 
 function genTree({ genRand, maxLevels, baseLength, maxWidth, rootX, rootY }) {
   function genNext({ x, y, angle, levelsRemaining }) {
-    if (levelsRemaining === 0) return { self: null, left: null, right: null };
+    if (levelsRemaining === 0) return null;
 
     const length = (levelsRemaining / maxLevels) * baseLength;
     const xDiff =
@@ -67,8 +67,8 @@ export default class App extends Component {
     const genRand = () => Math.PI * ((Math.random() - 0.5) * (1 / 16));
     const trunk = genTree({
       genRand,
-      rootX: 200,
-      rootY: 400,
+      rootX: 250,
+      rootY: 500,
       maxLevels: 8,
       baseLength: 75,
       maxWidth: 10
@@ -77,9 +77,9 @@ export default class App extends Component {
     return (
       <div>
         <svg
-          viewBox="0 0 400 400"
-          width="400"
-          height="400"
+          viewBox="0 0 500 500"
+          width="500"
+          height="500"
           version="1.1"
           baseProfile="full"
           xmlns="http://www.w3.org/2000/svg"
@@ -103,8 +103,29 @@ function Branch(props) {
         stroke-width={width}
         {...stroke}
       />
-      <Branch {...left} />
-      <Branch {...right} />
+      {left && right ? (
+        <>
+          <Branch {...left} />
+          <Branch {...right} />
+        </>
+      ) : (
+        <Leaf x={nextX} y={nextY} />
+      )}
     </g>
+  );
+}
+
+function Leaf(props) {
+  const { x, y } = props;
+
+  return (
+    <ellipse
+      cx={x}
+      cy={y}
+      rx="3"
+      ry="10"
+      fill="green"
+      stroke-width="3"
+    />
   );
 }
