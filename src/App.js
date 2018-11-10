@@ -52,12 +52,16 @@ function genTree({ genRand, maxLevels, baseLength, maxWidth, rootX, rootY }) {
 
 export default class App extends Component {
   componentDidMount() {
-    this.interval = setInterval(() => this.forceUpdate(), 1000);
+    window.addEventListener("keydown", this.handleKeyDown);
   }
 
   componentWillUnmount() {
-    clearInterval(this.interval);
+    window.removeEventListener("keydown", this.handleKeyDown);
   }
+
+  handleKeyDown = () => {
+    this.forceUpdate();
+  };
 
   render() {
     const genRand = () => Math.PI * ((Math.random() - 0.5) * (1 / 16));
