@@ -3,7 +3,7 @@ import "./App.css";
 
 const stroke = { stroke: "black", "stroke-linecap": "round" };
 
-function generateBranch({ startX, startY, level, xDiff, yDiff }) {
+function generateBranch({ startX, startY, level, angle, length }) {
   const strokeWidth = (() => {
     switch (level) {
       case 0:
@@ -16,6 +16,9 @@ function generateBranch({ startX, startY, level, xDiff, yDiff }) {
         throw new Error("too deep");
     }
   })();
+
+  const xDiff = Math.cos(angle) * length;
+  const yDiff = Math.sin(angle) * length;
 
   const nextX = startX + xDiff;
   const nextY = startY + yDiff;
@@ -42,39 +45,30 @@ function generateTree() {
           generateBranch({
             startX: 200,
             startY: 400,
-            xDiff: 0,
-            yDiff: -100,
+            angle: -Math.PI / 2,
+            length: 100,
             level
           })
         );
       } else if (level === 1) {
         const { nextX: startX, nextY: startY } = acc[acc.length - 1];
-        acc.push(
-          generateBranch({ startX, startY, xDiff: -50, yDiff: -50, level })
-        );
-        acc.push(
-          generateBranch({ startX, startY, xDiff: 50, yDiff: -50, level })
-        );
+        const common = { startX, startY, level, length: 75 };
+        acc.push(generateBranch({ ...common, angle: -((3 * Math.PI) / 4) }));
+        acc.push(generateBranch({ ...common, angle: -(Math.PI / 4) }));
       } else if (level === 2) {
         const left = acc[acc.length - 2];
-        const right  = acc[acc.length -1];
+        const right = acc[acc.length - 1];
         {
           let { nextX: startX, nextY: startY } = left;
-          acc.push(
-            generateBranch({ startX, startY, xDiff: 0, yDiff: -35, level })
-          );
-          acc.push(
-            generateBranch({ startX, startY, xDiff: -35, yDiff: 0, level })
-          );
+          const common = { startX, startY, level, length: 50 };
+          acc.push(generateBranch({ ...common, angle: -(Math.PI) }));
+          acc.push(generateBranch({ ...common, angle: -(Math.PI / 2) }));
         }
         {
           let { nextX: startX, nextY: startY } = right;
-          acc.push(
-            generateBranch({ startX, startY, xDiff: 0, yDiff: -35, level })
-          );
-          acc.push(
-            generateBranch({ startX, startY, xDiff: 35, yDiff: 0, level })
-          );
+          const common = { startX, startY, level, length: 50 };
+          acc.push(generateBranch({ ...common, angle: -(Math.PI / 2) }));
+          acc.push(generateBranch({ ...common, angle: 0 }));
         }
       }
 
