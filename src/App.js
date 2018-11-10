@@ -132,7 +132,7 @@ function Leaves(props) {
 
   return (
     <>
-      {lastLeaf && <Leaf x={nextX} y={nextY} />}
+      {lastLeaf && <Leaf {...self} />}
       {left && right ? (
         <>
           <Leaves {...left} />
@@ -144,7 +144,20 @@ function Leaves(props) {
 }
 
 function Leaf(props) {
-  const { x, y } = props;
+  const { x, y, nextX, nextY } = props;
 
-  return <ellipse cx={x} cy={y} rx="3" ry="10" fill="green" stroke-width="3" />;
+  const angle = ((Math.atan2(nextY - y, nextX - x) * 180) / Math.PI) - 90;
+  const rotate = `rotate(${angle} ${nextX} ${nextY})`;
+
+  return (
+    <ellipse
+      cx={nextX}
+      cy={nextY}
+      rx="3"
+      ry="10"
+      fill="green"
+      stroke-width="3"
+      transform={rotate}
+    />
+  );
 }
