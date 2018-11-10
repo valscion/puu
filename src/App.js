@@ -3,84 +3,54 @@ import "./App.css";
 
 const stroke = { stroke: "black", "stroke-linecap": "round" };
 
-function generateBranch({ startX, startY, level, angle, length, genRand }) {
-  const strokeWidth = (() => {
-    switch (level) {
-      case 0:
-        return 10;
-      case 1:
-        return 8;
-      case 2:
-        return 5;
-      default:
-        throw new Error("too deep");
-    }
-  })();
+function genTree({ genRand, maxLevels, baseLength, maxWidth, rootX, rootY }) {
+  function genNext({ x, y, angle, levelsRemaining }) {
+    if (levelsRemaining === 0) return { self: null, left: null, right: null };
 
-  const random = genRand();
+    const length = (levelsRemaining / maxLevels) * baseLength;
+    const xDiff =
+      Math.cos(angle + genRand()) * (length + genRand() * baseLength);
+    const yDiff =
+      Math.sin(angle + genRand()) * (length + genRand() * baseLength);
 
-  const xDiff = Math.cos(angle + random) * length;
-  const yDiff = Math.sin(angle + random) * length;
+    const nextX = x + xDiff;
+    const nextY = y + yDiff;
 
-  const nextX = startX + xDiff;
-  const nextY = startY + yDiff;
+    const widthFactor = levelsRemaining / maxLevels;
 
-  return {
-    paths: (
-      <path
-        d={`M${startX},${startY} ${nextX},${nextY}`}
-        stroke-width={strokeWidth}
-        {...stroke}
-      />
-    ),
-    nextX,
-    nextY
-  };
+    return {
+      self: {
+        x,
+        y,
+        nextX,
+        nextY,
+        width: maxWidth * widthFactor,
+        level: maxLevels - levelsRemaining
+      },
+      left: genNext({
+        x: nextX,
+        y: nextY,
+        angle: angle - Math.PI / 10,
+        levelsRemaining: levelsRemaining - 1
+      }),
+      right: genNext({
+        x: nextX,
+        y: nextY,
+        angle: angle + Math.PI / 10,
+        levelsRemaining: levelsRemaining - 1
+      })
+    };
+  }
+
+  return genNext({
+    x: rootX,
+    y: rootY,
+    angle: -Math.PI / 2,
+    levelsRemaining: maxLevels
+  });
 }
 
-function generateTree(genRand) {
-  return Array(3)
-    .fill(null)
-    .reduce((acc, next, level) => {
-      if (level === 0) {
-        acc.push(
-          generateBranch({
-            startX: 200,
-            startY: 400,
-            angle: -Math.PI / 2,
-            length: 100,
-            genRand,
-            level
-          })
-        );
-      } else if (level === 1) {
-        const { nextX: startX, nextY: startY } = acc[acc.length - 1];
-        const common = { genRand, startX, startY, level, length: 75 };
-        acc.push(generateBranch({ ...common, angle: -((3 * Math.PI) / 4) }));
-        acc.push(generateBranch({ ...common, angle: -(Math.PI / 4) }));
-      } else if (level === 2) {
-        const left = acc[acc.length - 2];
-        const right = acc[acc.length - 1];
-        {
-          let { nextX: startX, nextY: startY } = left;
-          const common = { genRand, startX, startY, level, length: 50 };
-          acc.push(generateBranch({ ...common, angle: -Math.PI }));
-          acc.push(generateBranch({ ...common, angle: -(Math.PI / 2) }));
-        }
-        {
-          let { nextX: startX, nextY: startY } = right;
-          const common = { genRand, startX, startY, level, length: 50 };
-          acc.push(generateBranch({ ...common, angle: -(Math.PI / 2) }));
-          acc.push(generateBranch({ ...common, angle: 0 }));
-        }
-      }
-
-      return acc;
-    }, [])
-    .map(value => value.paths);
-}
-
-class App extends Component {
+export default class App extends Component {
   componentDidMount() {
     this.interval = setInterval(() => this.forceUpdate(), 1000);
   }
@@ -91,6 +61,14 @@ class App extends Component {
 
   render() {
     const genRand = () => Math.PI * ((Math.random() - 0.5) * (1 / 16));
+    const trunk = genTree({
+      genRand,
+      rootX: 200,
+      rootY: 400,
+      maxLevels: 8,
+      baseLength: 75,
+      maxWidth: 10
+    });
 
     return (
       <div>
@@ -102,11 +80,27 @@ class App extends Component {
           baseProfile="full"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {generateTree(genRand)}
+          <Branch {...trunk} />
         </svg>
       </div>
     );
   }
 }
 
-export default App;
+function Branch(props) {
+  const { self, left, right } = props;
+  if (self === null) return null;
+  const { x, y, nextX, nextY, width, level } = self;
+
+  return (
+    <g data-level={level}>
+      <path
+        d={`M${x},${y} ${nextX},${nextY}`}
+        stroke-width={width}
+        {...stroke}
+      />
+      <Branch {...left} />
+      <Branch {...right} />
+    </g>
+  );
+}
