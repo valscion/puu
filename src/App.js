@@ -5,7 +5,7 @@ const stroke = { stroke: "black", "stroke-linecap": "round" };
 
 function genTree({ genRand, maxLevels, baseLength, maxWidth, rootX, rootY }) {
   function genNext({ x, y, angle, levelsRemaining }) {
-    if (levelsRemaining === 0) return null;
+    if (levelsRemaining <= 0) return null;
 
     const length = (levelsRemaining / maxLevels) * baseLength;
     const xDiff =
@@ -19,22 +19,40 @@ function genTree({ genRand, maxLevels, baseLength, maxWidth, rootX, rootY }) {
     const widthFactor = levelsRemaining / maxLevels;
 
     const others =
-      levelsRemaining === 1
+      levelsRemaining <= 1
         ? null
         : [
             genNext({
               x: nextX,
               y: nextY,
-              angle: angle - Math.PI / 10,
+              angle: angle - Math.PI / 14,
               levelsRemaining: levelsRemaining - 1
             }),
             genNext({
               x: nextX,
               y: nextY,
-              angle: angle + Math.PI / 10,
+              angle: angle + Math.PI / 8,
               levelsRemaining: levelsRemaining - 1
             })
           ];
+
+    if (
+      others &&
+      levelsRemaining > 3 &&
+      levelsRemaining < maxLevels - 1 &&
+      Math.random() < 0.8
+    ) {
+      const direction = Math.random() < 0.5 ? -1 : 1;
+
+      others.push(
+        genNext({
+          x: nextX,
+          y: nextY,
+          angle: angle + (Math.PI / 4) * direction,
+          levelsRemaining: 3
+        })
+      );
+    }
 
     return {
       self: {
@@ -74,9 +92,9 @@ export default class App extends Component {
     const genRand = () => Math.PI * ((Math.random() - 0.5) * (1 / 16));
     const trunk = genTree({
       genRand,
-      rootX: 250,
+      rootX: 200,
       rootY: 500,
-      maxLevels: 8,
+      maxLevels: 10,
       baseLength: 75,
       maxWidth: 10
     });
