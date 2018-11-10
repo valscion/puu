@@ -18,6 +18,24 @@ function genTree({ genRand, maxLevels, baseLength, maxWidth, rootX, rootY }) {
 
     const widthFactor = levelsRemaining / maxLevels;
 
+    const others =
+      levelsRemaining === 1
+        ? null
+        : [
+            genNext({
+              x: nextX,
+              y: nextY,
+              angle: angle - Math.PI / 10,
+              levelsRemaining: levelsRemaining - 1
+            }),
+            genNext({
+              x: nextX,
+              y: nextY,
+              angle: angle + Math.PI / 10,
+              levelsRemaining: levelsRemaining - 1
+            })
+          ];
+
     return {
       self: {
         x,
@@ -27,18 +45,7 @@ function genTree({ genRand, maxLevels, baseLength, maxWidth, rootX, rootY }) {
         width: maxWidth * widthFactor,
         level: maxLevels - levelsRemaining
       },
-      left: genNext({
-        x: nextX,
-        y: nextY,
-        angle: angle - Math.PI / 10,
-        levelsRemaining: levelsRemaining - 1
-      }),
-      right: genNext({
-        x: nextX,
-        y: nextY,
-        angle: angle + Math.PI / 10,
-        levelsRemaining: levelsRemaining - 1
-      })
+      others
     };
   }
 
@@ -93,7 +100,7 @@ export default class App extends Component {
 }
 
 function Branch(props) {
-  const { self, left, right } = props;
+  const { self, others } = props;
   if (self === null) return null;
   const { x, y, nextX, nextY, width, level } = self;
 
@@ -104,41 +111,22 @@ function Branch(props) {
         stroke-width={width}
         {...stroke}
       />
-      {left && right ? (
-        <>
-          <Branch {...left} />
-          <Branch {...right} />
-        </>
-      ) : null}
+      {others ? others.map((other, i) => <Branch key={i} {...other} />) : null}
     </g>
   );
 }
 
 function Leaves(props) {
-  const { self, left, right } = props;
-  if (self === null) return null;
-  const { level } = self;
-
-  if (level < 3) {
-    return (
-      <>
-        <Leaves {...left} />
-        <Leaves {...right} />
-      </>
-    );
-  }
-
-  const lastLeaf = !left && !right;
+  const { self, others } = props;
+  if (!self) return null;
+  const lastLeaf = !others;
 
   return (
     <>
       {lastLeaf && <Leaf {...self} />}
-      {left && right ? (
-        <>
-          <Leaves {...left} />
-          <Leaves {...right} />
-        </>
-      ) : null}
+      {!lastLeaf
+        ? others.map((other, i) => <Leaves key={i} {...other} />)
+        : null}
     </>
   );
 }
@@ -146,7 +134,7 @@ function Leaves(props) {
 function Leaf(props) {
   const { x, y, nextX, nextY } = props;
 
-  const angle = ((Math.atan2(nextY - y, nextX - x) * 180) / Math.PI) - 90;
+  const angle = (Math.atan2(nextY - y, nextX - x) * 180) / Math.PI - 90;
   const rotate = `rotate(${angle} ${nextX} ${nextY})`;
 
   return (
