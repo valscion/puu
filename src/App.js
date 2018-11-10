@@ -117,7 +117,7 @@ function Branch(props) {
 function Leaves(props) {
   const { self, left, right } = props;
   if (self === null) return null;
-  const { nextX, nextY, level } = self;
+  const { level } = self;
 
   if (level < 3) {
     return (
