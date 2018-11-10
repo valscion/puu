@@ -1,0 +1,10 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+svg {
+  margin-left: 1rem;
+  margin-top: 1rem;
+  outline: 1px dotted rgba(0, 255, 0, 0.5);
+}
